@@ -75,7 +75,7 @@ bool SyntaxAnalyzer::prog() {
       tokitr++;
       lexitr++;
       if (stmtlist()) {
-        if (tokitr != tokens.end()) // should be at end token
+        if (tokitr != tokens.end()) { // should be at last token
           if (*tokitr == "t_end") {
             tokitr++;
             lexitr++;
@@ -83,12 +83,12 @@ bool SyntaxAnalyzer::prog() {
               cout << "Valid source code file" << endl;
               return true;
             } else {
-              cout << "end came too early" << endl;
+              cout << "end came too late" << endl;
             }
           } else {
             cout << "invalid statement ending code" << endl;
           }
-        else {
+        } else {
           cout << "no end" << endl;
         }
       } else {
@@ -105,29 +105,37 @@ bool SyntaxAnalyzer::prog() {
 
 bool SyntaxAnalyzer::vdec() {
   // may contian errors
-
-  if (*tokitr != "t_var")
+  if (tokitr == tokens.end())
     return false;
-  else {
+
+  if (*tokitr != "t_var") {
+    // if not t_var, then check for an empty set -> t_main must be next
     tokitr++;
     lexitr++;
-
-    int result = 0; // 0 - valid, 1 - done, 2 - error
-    result = vars();
-
-    if (result == 2)
-      return false;
-
-    while (result == 0) {
-      if (tokitr != tokens.end())
-        result = vars(); // parse vars
-    }
-
-    if (result == 1)
-      return true;
+    if (tokitr != tokens.end() && *tokitr != "t_main")
+      return false; // invalid
     else
-      return false;
+      return true; // vdec is the null set
   }
+
+  tokitr++;
+  lexitr++;
+
+  int result = 0; // 0 - valid, 1 - done, 2 - error
+  result = vars();
+
+  if (result == 2)
+    return false;
+
+  while (result == 0) {
+    if (tokitr != tokens.end())
+      result = vars(); // parse vars
+  }
+
+  if (result == 1)
+    return true;
+  else
+    return false;
 }
 
 int SyntaxAnalyzer::vars() {
