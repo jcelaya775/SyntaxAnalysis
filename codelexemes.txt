@@ -1,0 +1,13 @@
+t_var : var
+t_integer : integer
+t_id : x
+s_comma : ,
+t_id : y
+s_comma : ,
+t_id : z
+s_semi : ;
+t_string : string
+t_id : y
+s_semi : ;
+t_main : main
+t_end : end

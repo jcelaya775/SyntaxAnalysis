@@ -36,11 +36,11 @@ private:
 public:
   SyntaxAnalyzer(istream &infile);
   // pre: 1st parameter consists of an open file containing a source code's
-  //	valid scanner output.  This data must be in the form
-  //			token : lexeme
+  // valid scanner output.  This data must be in the form
+  // token : lexeme
   // post: the vectors have been populated
 
-  bool parse();
+  bool prog();
   // pre: none
   // post: The lexemes/tokens have been parsed.
   // If an error occurs, a message prints indicating the token/lexeme pair
@@ -50,27 +50,31 @@ public:
 SyntaxAnalyzer::SyntaxAnalyzer(istream &infile) {
   string line, tok, lex;
   int pos;
+
   getline_safe(infile, line);
+
   bool valid = true;
   while (!infile.eof() && (valid)) {
     pos = line.find(":");
-    tok = line.substr(0, pos);
-    lex = line.substr(pos + 1, line.length());
-    cout << pos << " " << tok << " " << lex << endl;
+    tok = line.substr(0, pos - 1);
+    lex = line.substr(pos + 2, line.length());
+    cout << pos << " " << tok << " : " << lex << endl;
     tokens.push_back(tok);
     lexemes.push_back(lex);
     getline_safe(infile, line);
   }
+
   tokitr = tokens.begin();
   lexitr = lexemes.begin();
 }
 
-bool SyntaxAnalyzer::parse() { // checks for valid PROG
+// TO DO: SOME METHODS DO NOT CHECK FOR END OF LIST
+bool SyntaxAnalyzer::prog() {
   if (vdec()) {
     if (tokitr != tokens.end() && *tokitr == "t_main") {
       tokitr++;
       lexitr++;
-      if (tokitr != tokens.end() && stmtlist()) {
+      if (stmtlist()) {
         if (tokitr != tokens.end()) // should be at end token
           if (*tokitr == "t_end") {
             tokitr++;
@@ -103,14 +107,17 @@ bool SyntaxAnalyzer::vdec() {
   // may contian errors
 
   if (*tokitr != "t_var")
-    return true;
+    return false;
   else {
     tokitr++;
     lexitr++;
+
     int result = 0; // 0 - valid, 1 - done, 2 - error
     result = vars();
+
     if (result == 2)
       return false;
+
     while (result == 0) {
       if (tokitr != tokens.end())
         result = vars(); // parse vars
@@ -170,6 +177,7 @@ bool SyntaxAnalyzer::stmtlist() {
   else
     return true;
 }
+
 int SyntaxAnalyzer::stmt() { // returns 1 or 2 if valid, 0 if invalid
   if (*tokitr == "t_if") {
     tokitr++;
@@ -213,8 +221,37 @@ int SyntaxAnalyzer::stmt() { // returns 1 or 2 if valid, 0 if invalid
 }
 
 bool SyntaxAnalyzer::ifstmt() {
+  if (tokitr != tokens.end())
+    return false;
+  if (*tokitr != "s_lparen")
+    return false;
+  tokitr++;
+  lexitr++;
+  if (!expr())
+    return false;
+  if (*tokitr != "s_rparen")
+    return false;
+  tokitr++;
+  lexitr++;
+  if (*tokitr != "t_then")
+    return false;
+  if (!stmtlist())
+    return false;
+  tokitr++;
+  lexitr++;
+  if (*tokitr != "t_end")
+    return false;
+  tokitr++;
+  lexitr++;
+  if (!elsepart())
+    return false;
+  if (*tokitr != "t_if")
+    return false;
+
+  tokitr++;
+  lexitr++;
+  // if passed all tests -> return true;
   return true;
-  // we will write this together in class
 }
 
 bool SyntaxAnalyzer::elsepart() {
@@ -238,6 +275,7 @@ bool SyntaxAnalyzer::assignstmt() {
   return true;
   // write this function
 }
+
 bool SyntaxAnalyzer::inputstmt() {
   if (*tokitr == "s_lparen") {
     tokitr++;
@@ -325,6 +363,7 @@ bool SyntaxAnalyzer::relop() {
   } else
     return false;
 }
+
 std::istream &SyntaxAnalyzer::getline_safe(std::istream &input,
                                            std::string &output) {
   char c;
@@ -347,7 +386,9 @@ int main() {
     cout << "error opening lexemes.txt file" << endl;
     exit(-1);
   }
+
   SyntaxAnalyzer sa(infile);
-  sa.parse();
+  sa.prog();
+
   return 1;
 }
