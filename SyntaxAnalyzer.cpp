@@ -105,21 +105,11 @@ bool SyntaxAnalyzer::prog() {
 
 bool SyntaxAnalyzer::vdec() {
   // may contian errors
-  if (tokitr == tokens.end())
-    return false;
-
-  if (*tokitr != "t_var") {
-    // if not t_var, then check for an empty set -> t_main must be next
+  if (tokitr != tokens.end() && *tokitr == "t_var") {
     tokitr++;
     lexitr++;
-    if (tokitr != tokens.end() && *tokitr != "t_main")
-      return false; // invalid
-    else
-      return true; // vdec is the null set
-  }
-
-  tokitr++;
-  lexitr++;
+  } else
+    return false;
 
   int result = 0; // 0 - valid, 1 - done, 2 - error
   result = vars();
@@ -139,14 +129,14 @@ bool SyntaxAnalyzer::vdec() {
 }
 
 int SyntaxAnalyzer::vars() {
+  if (tokitr == tokens.end())
+    return 2;
+
   int result = 0; // 0 - valid, 1 - done, 2 - error
-  string temp;
   if (*tokitr == "t_integer") {
-    temp = "t_integer";
     tokitr++;
     lexitr++;
   } else if (*tokitr == "t_string") {
-    temp = "t_string";
     tokitr++;
     lexitr++;
   } else
@@ -175,7 +165,7 @@ int SyntaxAnalyzer::vars() {
 }
 
 bool SyntaxAnalyzer::stmtlist() {
-  int result = stmt();
+  int result = stmt(); //  0 - invalid, 1 - valid, 2 - done
 
   while (result == 1) {
     result = stmt();
@@ -204,7 +194,7 @@ int SyntaxAnalyzer::stmt() { // returns 1 or 2 if valid, 0 if invalid
   } else if (*tokitr == "t_id") { // assignment starts with identifier
     tokitr++;
     lexitr++;
-    cout << "t_id" << endl;
+    // cout << "t_id" << endl;
     if (assignstmt())
       return 1;
     else

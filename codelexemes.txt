@@ -10,12 +10,4 @@ t_string : string
 t_id : y
 s_semi : ;
 t_main : main
-t_id : s
-s_assign : =
-t_str : hello
-s_semi : ;
-t_id : x
-s_assign : =
-t_int : 7
-s_semi : ;
 t_end : end
