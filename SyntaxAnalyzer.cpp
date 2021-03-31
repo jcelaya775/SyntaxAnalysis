@@ -68,7 +68,6 @@ SyntaxAnalyzer::SyntaxAnalyzer(istream &infile) {
   lexitr = lexemes.begin();
 }
 
-// TO DO: SOME METHODS DO NOT CHECK FOR END OF LIST
 bool SyntaxAnalyzer::prog() {
   if (vdec()) {
     if (*tokitr == "t_main") {
@@ -300,7 +299,6 @@ bool SyntaxAnalyzer::assignstmt() {
   lexitr++;
 
   return true;
-  // write this function
 }
 
 bool SyntaxAnalyzer::inputstmt() {
@@ -334,7 +332,6 @@ bool SyntaxAnalyzer::outputstmt() {
   lexitr++;
 
   return true;
-  // write this function
 }
 
 bool SyntaxAnalyzer::expr() {
@@ -360,7 +357,6 @@ bool SyntaxAnalyzer::simpleexpr() {
         return false;
     } else
       return true;
-
   } else
     return false;
 }
